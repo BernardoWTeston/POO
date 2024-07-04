@@ -1,0 +1,52 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+public class Logger {
+
+    private static final String LOG_FILE = "log.txt";
+
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_GREEN = "\u001B[32m";
+    private static final String ANSI_YELLOW = "\u001B[33m";
+    private static final String ANSI_RED = "\u001B[31m";
+
+    public enum LogLevel {
+        DEBUG, WARNING, ERROR
+    }
+
+    public static void log(LogLevel level, String message) {
+
+        String formattedMessage = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                + " [" + level + "] " + message;
+
+        switch (level) {
+            case DEBUG:
+                System.out.println(ANSI_GREEN + formattedMessage + ANSI_RESET);
+                break;
+            case WARNING:
+                System.out.println(ANSI_YELLOW + formattedMessage + ANSI_RESET);
+                break;
+            case ERROR:
+                System.out.println(ANSI_RED + formattedMessage + ANSI_RESET);
+                break;
+            default:
+                System.out.println(formattedMessage);
+        }
+
+        try {
+            Files.write(Paths.get(LOG_FILE), (formattedMessage + "\n").getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            System.err.println("Erro ao escrever no arquivo de log: " + e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        log(LogLevel.DEBUG, "Esta é uma mensagem de debug");
+        log(LogLevel.WARNING, "Atenção! Este é um aviso.");
+        log(LogLevel.ERROR, "Erro! Algo deu errado.");
+    }
+}
